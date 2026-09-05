@@ -1,0 +1,682 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MARCA — Estúdio de Tatuagem</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@500;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react/18.2.0/umd/react.production.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/react-dom/18.2.0/umd/react-dom.production.min.js"></script>
+<style>
+  :root{
+    --ink:#121110;
+    --ink-2:#1b1917;
+    --paper:#EDE6DA;
+    --paper-dim:#D8CFC0;
+    --skin:#C9A98C;
+    --blood:#7A2E24;
+    --blood-bright:#9C3B2E;
+    --fog:#8b8478;
+    --line: rgba(237,230,218,0.14);
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    margin:0;
+    background:var(--ink);
+    color:var(--paper);
+    font-family:'Inter',sans-serif;
+    -webkit-font-smoothing:antialiased;
+  }
+  /* marca d'água fixa de tatuagem, visível do cabeçalho ao rodapé, atrás de todo o conteúdo */
+  .bg-watermark{
+    position:fixed;inset:0;z-index:-1;
+    background-image:url('https://images.unsplash.com/photo-1526893299283-37e82b1e4da5?auto=format&fit=crop&w=1600&q=60');
+    background-size:cover;background-position:center;
+    filter:grayscale(1) contrast(1.05);
+    opacity:0.09;
+    pointer-events:none;
+  }
+  .bg-watermark::after{
+    content:"";position:absolute;inset:0;
+    background:radial-gradient(ellipse at center, transparent 0%, var(--ink) 92%);
+  }
+  h1,h2,h3,.display{
+    font-family:'Big Shoulders Display',sans-serif;
+    font-weight:800;
+    letter-spacing:0.01em;
+    margin:0;
+  }
+  a{color:inherit;text-decoration:none;}
+  button{font-family:inherit;cursor:pointer;}
+  img,svg{display:block;max-width:100%;}
+  .wrap{max-width:1160px;margin:0 auto;padding:0 28px;}
+  @media (max-width:640px){.wrap{padding:0 20px;}}
+
+  /* focus visibility */
+  a:focus-visible, button:focus-visible{outline:2px solid var(--skin);outline-offset:3px;}
+  @media (prefers-reduced-motion: reduce){
+    *{animation-duration:0.001ms !important; transition-duration:0.001ms !important;}
+  }
+
+  /* NAV */
+  .nav{
+    position:fixed;top:0;left:0;right:0;z-index:50;
+    display:flex;align-items:center;justify-content:space-between;
+    padding:18px 28px;
+    background:rgba(18,17,16,0.86);
+    backdrop-filter:blur(8px);
+    border-bottom:1px solid var(--line);
+  }
+  .nav .logo{font-family:'Big Shoulders Display';font-weight:800;font-size:26px;letter-spacing:0.03em;}
+  .nav .logo span{color:var(--blood-bright);}
+  .nav-links{display:flex;gap:28px;align-items:center;}
+  .nav-links a{font-size:14px;color:var(--paper-dim);transition:color .2s;}
+  .nav-links a:hover{color:var(--paper);}
+  .nav-cta{
+    background:var(--blood);color:var(--paper);padding:9px 18px;border-radius:2px;
+    font-size:13px;font-weight:600;border:1px solid var(--blood-bright);
+    transition:background .2s;
+  }
+  .nav-cta:hover{background:var(--blood-bright);}
+  .nav-burger{display:none;background:none;border:1px solid var(--line);color:var(--paper);padding:8px 12px;border-radius:2px;}
+  @media (max-width:820px){
+    .nav-links{display:none;}
+    .nav-burger{display:block;}
+  }
+
+  /* HERO */
+  .hero{
+    padding:150px 0 90px;
+    display:grid;grid-template-columns:1.1fr 0.9fr;gap:40px;align-items:center;
+    border-bottom:1px solid var(--line);
+  }
+  @media (max-width:900px){.hero{grid-template-columns:1fr;padding-top:120px;}}
+  .kicker{
+    font-size:14px;color:var(--skin);margin-bottom:18px;
+  }
+  .hero h1{
+    font-size:clamp(48px,7vw,88px);
+    line-height:0.92;
+    text-transform:uppercase;
+  }
+  .hero p.lede{
+    font-family:'Inter';font-weight:400;font-size:18px;line-height:1.6;
+    color:var(--paper-dim);max-width:46ch;margin-top:26px;
+  }
+  .hero-ctas{display:flex;gap:16px;margin-top:36px;flex-wrap:wrap;}
+  .btn-primary{
+    background:var(--blood);color:var(--paper);padding:15px 26px;border-radius:2px;
+    font-size:15px;font-weight:600;border:1px solid var(--blood-bright);
+    transition:transform .15s, background .2s;
+  }
+  .btn-primary:hover{background:var(--blood-bright);transform:translateY(-1px);}
+  .btn-ghost{
+    background:transparent;color:var(--paper);padding:15px 26px;border-radius:2px;
+    font-size:15px;font-weight:600;border:1px solid var(--line);
+    transition:border-color .2s, color .2s;
+  }
+  .btn-ghost:hover{border-color:var(--paper-dim);color:var(--paper-dim);}
+  .hero-art{position:relative;display:flex;align-items:center;justify-content:center;}
+
+  /* LOGO TATUADA — selo estilo flash, com texto em gradiente de tinta animado */
+  .tattoo-logo{position:relative;width:min(360px,80vw);aspect-ratio:1/1;}
+  .tattoo-logo svg{position:absolute;inset:0;width:100%;height:100%;color:var(--paper-dim);opacity:0.55;}
+  .tattoo-logo .ring-outer{animation:inkRotate 60s linear infinite;}
+  .tattoo-logo .ring-inner{animation:inkRotate 40s linear infinite reverse;}
+  .tattoo-logo-text{
+    position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+    text-align:center;
+  }
+  .tattoo-logo-text span{
+    font-family:'Big Shoulders Display';font-weight:800;font-size:clamp(40px,7vw,58px);
+    text-transform:uppercase;letter-spacing:0.02em;line-height:0.9;
+    background:linear-gradient(120deg,var(--paper) 0%,var(--blood-bright) 30%,var(--skin) 55%,var(--paper-dim) 75%,var(--blood-bright) 100%);
+    background-size:300% 100%;
+    -webkit-background-clip:text;background-clip:text;color:transparent;
+    animation:inkBleed 7s ease-in-out infinite;
+    filter:url(#inkTexture);
+  }
+  .tattoo-logo-text small{
+    display:block;font-family:'Inter';font-weight:500;font-size:11px;letter-spacing:0.25em;
+    color:var(--fog);text-transform:uppercase;margin-top:8px;-webkit-text-fill-color:var(--fog);
+  }
+  @keyframes inkBleed{
+    0%{background-position:0% 50%;}
+    50%{background-position:100% 50%;}
+    100%{background-position:0% 50%;}
+  }
+  @keyframes inkRotate{from{transform:rotate(0deg);}to{transform:rotate(360deg);}}
+
+  .hero-fade-in{animation:heroReveal .9s ease both;}
+  .hero-fade-in.d2{animation-delay:.12s;}
+  .hero-fade-in.d3{animation-delay:.24s;}
+  @keyframes heroReveal{
+    from{opacity:0;transform:translateY(14px);}
+    to{opacity:1;transform:translateY(0);}
+  }
+
+  /* SECTION GENERIC */
+  section{padding:96px 0;border-bottom:1px solid var(--line);}
+  .section-head{display:flex;justify-content:space-between;align-items:flex-end;gap:24px;margin-bottom:52px;flex-wrap:wrap;}
+  .section-head h2{font-size:clamp(30px,4vw,46px);text-transform:uppercase;max-width:16ch;}
+  .section-head p{color:var(--fog);max-width:38ch;font-size:15px;line-height:1.6;}
+
+  /* STYLES GRID (flash-sheet feel) */
+  .styles-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--line);border:1px solid var(--line);}
+  @media (max-width:760px){.styles-grid{grid-template-columns:repeat(2,1fr);}}
+  @media (max-width:480px){.styles-grid{grid-template-columns:1fr;}}
+  .style-card{
+    background:var(--ink);padding:34px 26px;min-height:200px;
+    display:flex;flex-direction:column;gap:14px;justify-content:space-between;
+    transition:background .25s;
+  }
+  .style-card:hover{background:var(--ink-2);}
+  .style-card svg{width:34px;height:34px;color:var(--skin);}
+  .style-card h3{font-size:20px;text-transform:uppercase;font-weight:700;}
+  .style-card p{color:var(--fog);font-size:14px;line-height:1.55;margin:0;}
+
+  /* PORTFOLIO — flash sheet wall */
+  .flash-wall{
+    display:grid;grid-template-columns:repeat(4,1fr);gap:16px;
+  }
+  @media (max-width:900px){.flash-wall{grid-template-columns:repeat(2,1fr);}}
+  .flash-card{
+    background:var(--paper);color:var(--ink);border-radius:2px;
+    padding:22px 16px 16px;position:relative;
+    box-shadow:0 10px 24px rgba(0,0,0,0.35);
+    transform:rotate(var(--rot,0deg));
+    transition:transform .25s;
+  }
+  .flash-card:hover{transform:rotate(0deg) translateY(-4px);}
+  .flash-card svg{width:100%;height:120px;color:var(--ink);}
+  .flash-card .tag{
+    margin-top:14px;font-size:12px;color:var(--blood);font-weight:600;text-transform:uppercase;letter-spacing:.04em;
+  }
+  .flash-card .num{position:absolute;top:10px;right:14px;font-family:'Big Shoulders Display';font-size:13px;color:var(--fog);}
+
+  /* GALERIA — fotos reais, alto padrão, com aviso no hover */
+  .gallery{display:grid;grid-template-columns:repeat(4,1fr);grid-auto-rows:150px;gap:14px;}
+  @media (max-width:900px){.gallery{grid-template-columns:repeat(2,1fr);grid-auto-rows:130px;}}
+  .gallery-item{
+    position:relative;overflow:hidden;border-radius:3px;
+    grid-column:span 1;grid-row:span 1;background:var(--ink-2);
+  }
+  .gallery-item.tall{grid-row:span 2;}
+  .gallery-item.wide{grid-column:span 2;}
+  .gallery-item img{
+    position:absolute;inset:0;width:100%;height:100%;object-fit:cover;
+    filter:saturate(0.85) contrast(1.05);
+    transition:transform .5s ease, filter .5s ease;
+  }
+  .gallery-item:hover img{transform:scale(1.07);filter:saturate(1.05) contrast(1.08);}
+  .gallery-item .g-tag{
+    position:absolute;left:12px;bottom:12px;z-index:2;
+    font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--paper);
+    background:rgba(18,17,16,0.55);padding:5px 10px;border-radius:2px;
+    transition:opacity .25s;
+  }
+  .gallery-overlay{
+    position:absolute;inset:0;background:rgba(18,16,15,0.86);
+    display:flex;align-items:center;justify-content:center;text-align:center;padding:16px;
+    opacity:0;transition:opacity .3s;
+  }
+  .gallery-item:hover .gallery-overlay{opacity:1;}
+  .gallery-item:hover .g-tag{opacity:0;}
+  .gallery-overlay p{font-size:12.5px;line-height:1.55;color:var(--paper-dim);margin:0;max-width:22ch;}
+  .gallery-overlay strong{display:block;color:var(--skin);font-size:11px;letter-spacing:.08em;text-transform:uppercase;margin-bottom:6px;}
+  .gallery-note{color:var(--fog);font-size:13px;margin-top:20px;}
+
+  /* ARTISTS */
+  .artists{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;}
+  @media (max-width:820px){.artists{grid-template-columns:1fr;}}
+  .artist-card{border:1px solid var(--line);padding:28px;display:flex;gap:18px;align-items:flex-start;}
+  .avatar{
+    width:56px;height:56px;border-radius:50%;flex:none;
+    background:linear-gradient(160deg,var(--skin),var(--blood));
+    display:flex;align-items:center;justify-content:center;
+    font-family:'Big Shoulders Display';font-weight:800;font-size:20px;color:var(--ink);
+  }
+  .artist-card h3{font-size:19px;text-transform:uppercase;margin-bottom:4px;}
+  .artist-card .role{color:var(--skin);font-size:13px;margin-bottom:10px;}
+  .artist-card p.bio{color:var(--fog);font-size:14px;line-height:1.55;margin:0;}
+
+  /* PROCESS */
+  .process{display:grid;grid-template-columns:repeat(4,1fr);gap:24px;}
+  @media (max-width:820px){.process{grid-template-columns:1fr 1fr;}}
+  @media (max-width:520px){.process{grid-template-columns:1fr;}}
+  .step{border-top:2px solid var(--blood);padding-top:16px;}
+  .step .n{font-family:'Big Shoulders Display';font-size:34px;color:var(--paper-dim);}
+  .step h3{font-size:17px;text-transform:uppercase;margin:8px 0 8px;}
+  .step p{color:var(--fog);font-size:14px;line-height:1.55;margin:0;}
+
+  /* TESTIMONIALS */
+  .testimonials{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;}
+  @media (max-width:820px){.testimonials{grid-template-columns:1fr;}}
+  .testi{background:var(--ink-2);padding:26px;border:1px solid var(--line);}
+  .testi p{font-size:15px;line-height:1.6;color:var(--paper-dim);margin:0 0 16px;}
+  .testi .who{font-size:13px;color:var(--skin);}
+
+  /* CONTACT / CTA BANNER */
+  .cta-banner{
+    display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:28px;
+    background:var(--blood);padding:56px;border-radius:2px;
+  }
+  .cta-banner h2{font-size:clamp(28px,4vw,42px);text-transform:uppercase;max-width:14ch;color:var(--paper);}
+  .cta-banner p{color:rgba(237,230,218,0.85);font-size:15px;margin-top:10px;}
+  .cta-banner .btn-primary{background:var(--ink);border-color:var(--ink);}
+  .cta-banner .btn-primary:hover{background:var(--ink-2);}
+  .info-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:24px;margin-top:48px;}
+  @media (max-width:760px){.info-grid{grid-template-columns:1fr;}}
+  .info-item h3{font-size:14px;text-transform:uppercase;color:var(--skin);margin-bottom:8px;}
+  .info-item p{color:var(--paper-dim);font-size:15px;line-height:1.6;margin:0;}
+
+  footer{padding:36px 0;color:var(--fog);font-size:13px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px;}
+
+  /* WHATSAPP WIDGET */
+  .wa-fab{
+    position:fixed;bottom:24px;right:24px;z-index:60;
+    width:60px;height:60px;border-radius:50%;
+    background:#25D366;border:none;color:#0b1a10;
+    display:flex;align-items:center;justify-content:center;
+    box-shadow:0 8px 20px rgba(0,0,0,0.4);
+    transition:transform .2s;
+  }
+  .wa-fab:hover{transform:scale(1.06);}
+  .wa-fab svg{width:28px;height:28px;}
+  .wa-panel{
+    position:fixed;bottom:96px;right:24px;z-index:60;
+    width:320px;max-width:calc(100vw - 40px);
+    background:var(--paper);color:var(--ink);border-radius:10px;
+    overflow:hidden;box-shadow:0 20px 50px rgba(0,0,0,0.5);
+    animation:panelIn .18s ease both;
+  }
+  @keyframes panelIn{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
+  .wa-head{background:#075E54;color:#fff;padding:14px 16px;display:flex;justify-content:space-between;align-items:center;}
+  .wa-head strong{font-size:14px;}
+  .wa-head span{display:block;font-size:12px;color:#c9e8de;}
+  .wa-head button{background:none;border:none;color:#fff;font-size:18px;line-height:1;}
+  .wa-body{padding:16px;background:#ECE5DD;}
+  .wa-bubble{background:#fff;padding:10px 12px;border-radius:0 8px 8px 8px;font-size:13.5px;line-height:1.5;margin-bottom:14px;max-width:92%;}
+  .wa-quick{display:flex;flex-direction:column;gap:8px;}
+  .wa-quick button{
+    text-align:left;background:#fff;border:1px solid #d8d2c8;border-radius:8px;
+    padding:10px 12px;font-size:13.5px;color:#111;
+  }
+  .wa-quick button:hover{border-color:#25D366;}
+  .wa-foot{padding:10px 12px;background:#F0F0F0;display:flex;gap:8px;}
+  .wa-foot input{
+    flex:1;border:1px solid #d8d2c8;border-radius:20px;padding:9px 14px;font-size:13px;
+  }
+  .wa-foot button{
+    background:#25D366;border:none;border-radius:50%;width:36px;height:36px;
+    display:flex;align-items:center;justify-content:center;flex:none;
+  }
+  .wa-foot button svg{width:16px;height:16px;color:#fff;}
+</style>
+</head>
+<body>
+<div id="root"></div>
+
+<script>
+const h = React.createElement;
+const WHATS_NUMBER = "5562999999999"; // TODO: troque pelo número real do estúdio (código do país + DDD + número)
+
+function waLink(message){
+  return "https://wa.me/" + WHATS_NUMBER + "?text=" + encodeURIComponent(message);
+}
+
+/* ---------- ícones SVG simples (traço fino, estética de flash sheet) ---------- */
+const Icon = {
+  fineLine: () => h("svg",{viewBox:"0 0 48 48",fill:"none",stroke:"currentColor",strokeWidth:"1.4"},
+    h("path",{d:"M6 34 C 14 10, 22 10, 24 24 C 26 38, 34 38, 42 14"})),
+  blackwork: () => h("svg",{viewBox:"0 0 48 48",fill:"currentColor"},
+    h("path",{d:"M6 6h14v14H6zM28 6h14v6H28zM28 16h9v14H28zM6 26h9v16H6zM19 30h11v12H19z"})),
+  geometric: () => h("svg",{viewBox:"0 0 48 48",fill:"none",stroke:"currentColor",strokeWidth:"1.4"},
+    h("path",{d:"M24 4 44 16 44 34 24 44 4 34 4 16 Z"}),
+    h("path",{d:"M24 4v40M4 16l40 18M44 16 4 34"})),
+  watercolor: () => h("svg",{viewBox:"0 0 48 48",fill:"none",stroke:"currentColor",strokeWidth:"1.4"},
+    h("circle",{cx:"18",cy:"18",r:"10"}),
+    h("circle",{cx:"30",cy:"28",r:"12",opacity:"0.55"})),
+  lettering: () => h("svg",{viewBox:"0 0 48 48",fill:"none",stroke:"currentColor",strokeWidth:"1.4"},
+    h("path",{d:"M6 36 C 6 12, 22 8, 22 22 C 22 34, 8 34, 10 24 C 12 14, 26 10, 30 22 C 33 32, 42 32, 42 20"})),
+  coverup: () => h("svg",{viewBox:"0 0 48 48",fill:"none",stroke:"currentColor",strokeWidth:"1.4"},
+    h("rect",{x:"6",y:"6",width:"36",height:"36",rx:"2"}),
+    h("path",{d:"M12 12l24 24M36 12 12 36"})),
+  whatsapp: () => h("svg",{viewBox:"0 0 32 32",fill:"currentColor"},
+    h("path",{d:"M16 3C9 3 3 9 3 16c0 2.5.7 4.8 1.9 6.8L3 29l6.4-1.8c1.9 1.1 4.1 1.7 6.6 1.7 7 0 13-6 13-13S23 3 16 3zm0 23.6c-2.2 0-4.3-.6-6.1-1.7l-.4-.3-3.8 1 1-3.7-.3-.4C5.3 20 4.6 18 4.6 16c0-6.3 5.1-11.4 11.4-11.4S27.4 9.7 27.4 16 22.3 26.6 16 26.6zm6.2-8.5c-.3-.2-2-1-2.3-1.1-.3-.1-.5-.2-.7.2-.2.3-.8 1.1-1 1.3-.2.2-.4.2-.7.1-.3-.2-1.4-.5-2.6-1.6-1-.9-1.6-2-1.8-2.3-.2-.3 0-.5.1-.6.1-.1.3-.4.5-.5.1-.2.2-.3.3-.5.1-.2 0-.4 0-.5C13.9 12 13.3 10.5 13 10c-.2-.5-.5-.4-.7-.4h-.6c-.2 0-.5.1-.8.4-.3.3-1 1-1 2.5s1.1 2.9 1.2 3.1c.2.2 2.2 3.4 5.3 4.6.7.3 1.3.5 1.8.6.7.2 1.4.2 1.9.1.6-.1 1.8-.7 2-1.5.3-.7.3-1.3.2-1.5-.1-.1-.3-.2-.6-.4z"})),
+  send: () => h("svg",{viewBox:"0 0 24 24",fill:"currentColor"},h("path",{d:"M3 20l18-8L3 4v6l12 2-12 2z"})),
+};
+
+/* ---------- dados de conteúdo ---------- */
+const STYLES = [
+  {icon:"fineLine", title:"Fine line", desc:"Traços finos e contínuos, para peças delicadas e discretas."},
+  {icon:"blackwork", title:"Blackwork", desc:"Preenchimentos sólidos e alto contraste, presença forte na pele."},
+  {icon:"geometric", title:"Geometria", desc:"Simetria, pontilhismo e formas construídas com precisão."},
+  {icon:"watercolor", title:"Aquarela", desc:"Manchas de cor soltas, efeito pintado, sem contornos rígidos."},
+  {icon:"lettering", title:"Lettering", desc:"Caligrafia autoral para frases, nomes e datas importantes."},
+  {icon:"coverup", title:"Cover-up", desc:"Reconstrução de tatuagens antigas em novas composições."},
+];
+
+const FLASH = [
+  {icon:"fineLine", tag:"Botânica"},
+  {icon:"geometric", tag:"Dotwork"},
+  {icon:"lettering", tag:"Autoral"},
+  {icon:"blackwork", tag:"Ornamental"},
+  {icon:"watercolor", tag:"Aquarela"},
+  {icon:"coverup", tag:"Reforma"},
+  {icon:"fineLine", tag:"Micro"},
+  {icon:"geometric", tag:"Sagrada"},
+];
+
+const GALLERY = [
+  {src:"https://images.unsplash.com/photo-1562379825-415aea84ebcf?auto=format&fit=crop&w=900&q=70", alt:"Tatuagem blackwork floral em preto", tag:"Blackwork", size:"tall"},
+  {src:"https://images.unsplash.com/photo-1604374376934-2df6fad6519b?auto=format&fit=crop&w=900&q=70", alt:"Tatuagem tribal em preto e marrom", tag:"Tribal", size:""},
+  {src:"https://images.unsplash.com/photo-1601848714157-d845bb5c11ff?auto=format&fit=crop&w=1200&q=70", alt:"Tatuagem colorida em vermelho e preto na perna", tag:"Colorida", size:"wide"},
+  {src:"https://images.unsplash.com/photo-1562962230-16e4623d36e6?auto=format&fit=crop&w=900&q=70", alt:"Tatuagem floral em tons de cinza no braço", tag:"Fine line", size:"tall"},
+  {src:"https://images.unsplash.com/photo-1565058379802-bbe93b2f703a?auto=format&fit=crop&w=900&q=70", alt:"Processo de tatuagem em andamento no braço", tag:"Processo", size:""},
+  {src:"https://images.unsplash.com/photo-1568515045052-f9a854d70bfd?auto=format&fit=crop&w=1200&q=70", alt:"Mãos de tatuador durante uma sessão", tag:"Estúdio", size:"wide"},
+];
+
+const ARTISTS = [
+  {initials:"LC", name:"Lu Cruz", role:"Fine line & botânica", bio:"8 anos de estúdio, especialista em peças delicadas e composições florais."},
+  {initials:"BM", name:"Bia Moraes", role:"Blackwork & ornamental", bio:"Formação em artes visuais, trabalha com preenchimentos e padrões geométricos."},
+  {initials:"TK", name:"Theo Kai", role:"Lettering & cover-up", bio:"Caligrafia autoral e reconstrução de tatuagens antigas com sensibilidade."},
+];
+
+const STEPS = [
+  {n:"01", title:"Consulta", desc:"Conversa sobre ideia, referências, tamanho e local do corpo."},
+  {n:"02", title:"Design", desc:"Esboço exclusivo enviado para ajustes antes da sessão."},
+  {n:"03", title:"Sessão", desc:"Ambiente climatizado, material esterilizado e descartável."},
+  {n:"04", title:"Cuidados", desc:"Orientação de cicatrização com acompanhamento pelo WhatsApp."},
+];
+
+const TESTIMONIALS = [
+  {text:"Marquei pelo WhatsApp, tirei todas as dúvidas antes de ir e o resultado ficou exatamente como o desenho combinado.", who:"Renata A."},
+  {text:"Ambiente limpo, silencioso, e a artista entendeu perfeitamente o que eu queria sem eu saber explicar direito.", who:"Diego F."},
+  {text:"Fiz um cover-up que eu já achava impossível de disfarçar. Ficou irreconhecível — no bom sentido.", who:"Camila S."},
+];
+
+/* ---------- componentes ---------- */
+function Nav(){
+  return h("nav",{className:"nav"},
+    h("div",{className:"logo"},"MARCA", h("span",null,".")),
+    h("div",{className:"nav-links"},
+      h("a",{href:"#estilos"},"Estilos"),
+      h("a",{href:"#portfolio"},"Portfólio"),
+      h("a",{href:"#galeria"},"Galeria"),
+      h("a",{href:"#processo"},"Processo"),
+      h("a",{href:"#depoimentos"},"Depoimentos"),
+      h("a",{href:"#contato",className:"nav-cta"},"Agendar consulta")
+    ),
+    h("a",{href:"#contato",className:"nav-cta",style:{display:"none"}})
+  );
+}
+
+function Hero(){
+  return h("header",{className:"hero wrap"},
+    h("div",null,
+      h("div",{className:"kicker hero-fade-in"},"Estúdio autoral em Goiânia"),
+      h("h1",{className:"hero-fade-in d2"},"Cada marca conta uma história"),
+      h("p",{className:"lede hero-fade-in d3"},
+        "Tatuagem autoral, ambiente limpo e processo transparente: da ideia ao cuidado depois da agulha, tudo combinado direto com o artista pelo WhatsApp."),
+      h("div",{className:"hero-ctas hero-fade-in d3"},
+        h("a",{className:"btn-primary",href:waLink("Olá! Quero agendar uma consulta no estúdio MARCA.")},"Falar no WhatsApp"),
+        h("a",{className:"btn-ghost",href:"#portfolio"},"Ver portfólio")
+      )
+    ),
+    h("div",{className:"hero-art hero-fade-in d3"},
+      h(TattooLogo)
+    )
+  );
+}
+
+function TattooLogo(){
+  return h("div",{className:"tattoo-logo"},
+    h("svg",{viewBox:"0 0 200 200",fill:"none",stroke:"currentColor",strokeWidth:"0.8"},
+      h("filter",{id:"inkTexture"},
+        h("feTurbulence",{type:"fractalNoise",baseFrequency:"0.015 0.15",numOctaves:"2",seed:"7",result:"noise"}),
+        h("feDisplacementMap",{in:"SourceGraphic",in2:"noise",scale:"3"})
+      ),
+      h("circle",{className:"ring-outer",cx:"100",cy:"100",r:"92"}),
+      h("circle",{className:"ring-inner",cx:"100",cy:"100",r:"78",strokeDasharray:"2 6"}),
+      h("path",{className:"ring-outer",d:"M100 8 L104 20 L96 20 Z",fill:"currentColor",stroke:"none"}),
+      h("path",{className:"ring-outer",d:"M100 192 L104 180 L96 180 Z",fill:"currentColor",stroke:"none"})
+    ),
+    h("div",{className:"tattoo-logo-text"},
+      h("div",null,
+        h("span",null,"Marca"),
+        h("small",null,"Estúdio de tatuagem")
+      )
+    )
+  );
+}
+
+function StylesSection(){
+  return h("section",{id:"estilos"},
+    h("div",{className:"wrap"},
+      h("div",{className:"section-head"},
+        h("h2",null,"O que tatuamos"),
+        h("p",null,"Cada artista tem sua especialidade — você escolhe o estilo, a gente cuida da técnica.")
+      ),
+      h("div",{className:"styles-grid"},
+        STYLES.map((s,i)=>h("div",{className:"style-card",key:i},
+          h(Icon[s.icon]),
+          h("div",null,
+            h("h3",null,s.title),
+            h("p",null,s.desc)
+          )
+        ))
+      )
+    )
+  );
+}
+
+function PortfolioSection(){
+  return h("section",{id:"portfolio"},
+    h("div",{className:"wrap"},
+      h("div",{className:"section-head"},
+        h("h2",null,"Parede de flash"),
+        h("p",null,"Uma amostra do repertório do estúdio — peças exclusivas, feitas uma única vez.")
+      ),
+      h("div",{className:"flash-wall"},
+        FLASH.map((f,i)=>h("div",{
+            className:"flash-card",
+            key:i,
+            style:{"--rot":(i%2===0?"-1.5deg":"1.5deg")}
+          },
+          h("span",{className:"num"},"№ "+(i+1)),
+          h(Icon[f.icon]),
+          h("div",{className:"tag"},f.tag)
+        ))
+      )
+    )
+  );
+}
+
+function GallerySection(){
+  return h("section",{id:"galeria"},
+    h("div",{className:"wrap"},
+      h("div",{className:"section-head"},
+        h("h2",null,"Referências em alta definição"),
+        h("p",null,"Fotografias profissionais que representam o nível de acabamento buscado pelo estúdio.")
+      ),
+      h("div",{className:"gallery"},
+        GALLERY.map((g,i)=>h("div",{className:"gallery-item "+g.size,key:i},
+          h("img",{src:g.src,alt:g.alt,loading:"lazy"}),
+          h("span",{className:"g-tag"},g.tag),
+          h("div",{className:"gallery-overlay"},
+            h("p",null,
+              h("strong",null,"Exemplo ilustrativo"),
+              "Imagem de banco de imagens profissional, usada como referência de estilo — não é uma foto de trabalho autoral do estúdio."
+            )
+          )
+        ))
+      ),
+      h("p",{className:"gallery-note"},"Fotos ilustrativas (banco de imagens, uso livre) — o portfólio real do estúdio é atualizado com os trabalhos autorais de cada artista.")
+    )
+  );
+}
+
+function ArtistsSection(){
+  return h("section",{id:"artistas"},
+    h("div",{className:"wrap"},
+      h("div",{className:"section-head"},
+        h("h2",null,"Quem tatua"),
+        h("p",null,"Time pequeno, agenda cuidadosa — cada artista atende poucos projetos por semana.")
+      ),
+      h("div",{className:"artists"},
+        ARTISTS.map((a,i)=>h("div",{className:"artist-card",key:i},
+          h("div",{className:"avatar"},a.initials),
+          h("div",null,
+            h("h3",null,a.name),
+            h("div",{className:"role"},a.role),
+            h("p",{className:"bio"},a.bio)
+          )
+        ))
+      )
+    )
+  );
+}
+
+function ProcessSection(){
+  return h("section",{id:"processo"},
+    h("div",{className:"wrap"},
+      h("div",{className:"section-head"},
+        h("h2",null,"Como funciona"),
+        h("p",null,"Do primeiro contato até a pele cicatrizada.")
+      ),
+      h("div",{className:"process"},
+        STEPS.map((s,i)=>h("div",{className:"step",key:i},
+          h("div",{className:"n"},s.n),
+          h("h3",null,s.title),
+          h("p",null,s.desc)
+        ))
+      )
+    )
+  );
+}
+
+function TestimonialsSection(){
+  return h("section",{id:"depoimentos"},
+    h("div",{className:"wrap"},
+      h("div",{className:"section-head"},
+        h("h2",null,"Quem já marcou a pele")
+      ),
+      h("div",{className:"testimonials"},
+        TESTIMONIALS.map((t,i)=>h("div",{className:"testi",key:i},
+          h("p",null,"\u201C"+t.text+"\u201D"),
+          h("div",{className:"who"},t.who)
+        ))
+      )
+    )
+  );
+}
+
+function ContactSection(){
+  return h("section",{id:"contato",style:{borderBottom:"none"}},
+    h("div",{className:"wrap"},
+      h("div",{className:"cta-banner"},
+        h("div",null,
+          h("h2",null,"Vamos marcar sua próxima tatuagem?"),
+          h("p",null,"Resposta rápida, sem burocracia — direto no WhatsApp do estúdio.")
+        ),
+        h("a",{className:"btn-primary",href:waLink("Olá! Vim pelo site e quero saber mais sobre orçamento.")},"Chamar no WhatsApp")
+      ),
+      h("div",{className:"info-grid"},
+        h("div",{className:"info-item"},
+          h("h3",null,"Endereço"),
+          h("p",null,"Rua das Agulhas, 120 — Setor Central, Goiânia (GO)")
+        ),
+        h("div",{className:"info-item"},
+          h("h3",null,"Horário"),
+          h("p",null,"Terça a sábado, 11h às 20h — atendimento com hora marcada")
+        ),
+        h("div",{className:"info-item"},
+          h("h3",null,"Contato"),
+          h("p",null,"WhatsApp: (62) 99999-9999",h("br"),"@marca.tattoo")
+        )
+      )
+    )
+  );
+}
+
+function Footer(){
+  return h("footer",{className:"wrap"},
+    h("span",null,"© 2026 MARCA Estúdio de Tatuagem"),
+    h("span",null,"Feito com cuidado — pele é permanente, decisão também deveria ser.")
+  );
+}
+
+/* ---------- widget de WhatsApp ---------- */
+function WhatsAppWidget(){
+  const [open,setOpen] = React.useState(false);
+  const [msg,setMsg] = React.useState("");
+
+  const quick = [
+    "Quero saber valores de orçamento",
+    "Quero agendar uma consulta",
+    "Tenho dúvidas sobre cuidados pós-tatuagem",
+  ];
+
+  function sendCustom(){
+    if(!msg.trim()) return;
+    window.open(waLink(msg), "_blank");
+    setMsg("");
+  }
+
+  return h(React.Fragment,null,
+    open && h("div",{className:"wa-panel",role:"dialog","aria-label":"Chat do WhatsApp"},
+      h("div",{className:"wa-head"},
+        h("div",null,
+          h("strong",null,"Estúdio MARCA"),
+          h("span",null,"costuma responder em minutos")
+        ),
+        h("button",{onClick:()=>setOpen(false),"aria-label":"Fechar chat"},"\u2715")
+      ),
+      h("div",{className:"wa-body"},
+        h("div",{className:"wa-bubble"},"Oi! 👋 Como posso te ajudar hoje?"),
+        h("div",{className:"wa-quick"},
+          quick.map((q,i)=>h("button",{key:i,onClick:()=>window.open(waLink(q),"_blank")},q))
+        )
+      ),
+      h("div",{className:"wa-foot"},
+        h("input",{
+          placeholder:"Escreva sua mensagem...",
+          value:msg,
+          onChange:e=>setMsg(e.target.value),
+          onKeyDown:e=>{if(e.key==="Enter") sendCustom();}
+        }),
+        h("button",{onClick:sendCustom,"aria-label":"Enviar"},h(Icon.send))
+      )
+    ),
+    h("button",{className:"wa-fab",onClick:()=>setOpen(o=>!o),"aria-label":"Abrir chat do WhatsApp"},
+      h(Icon.whatsapp)
+    )
+  );
+}
+
+function App(){
+  return h(React.Fragment,null,
+    h("div",{className:"bg-watermark","aria-hidden":"true"}),
+    h(Nav),
+    h(Hero),
+    h(StylesSection),
+    h(PortfolioSection),
+    h(GallerySection),
+    h(ArtistsSection),
+    h(ProcessSection),
+    h(TestimonialsSection),
+    h(ContactSection),
+    h(Footer),
+    h(WhatsAppWidget)
+  );
+}
+
+const root = ReactDOM.createRoot(document.getElementById("root"));
+root.render(h(App));
+</script>
+</body>
+</html>
